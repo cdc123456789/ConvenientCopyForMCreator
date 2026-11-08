@@ -1,9 +1,13 @@
 package org.cdc.copy;
 
+import net.mcreator.io.TemplatesLoader;
 import net.mcreator.plugin.JavaPlugin;
 import net.mcreator.plugin.Plugin;
 import net.mcreator.plugin.events.PreGeneratorsLoadingEvent;
+import net.mcreator.plugin.events.ui.PreferencesDialogEvent;
 import net.mcreator.plugin.events.workspace.MCreatorLoadedEvent;
+import net.mcreator.preferences.PreferencesManager;
+import net.mcreator.ui.dialogs.preferences.PreferencesDialog;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -25,6 +29,10 @@ public class PluginMain extends JavaPlugin {
             Extractors.getInstance().init();
             Convertors.getInstance().init();
             TypeAdapters.getInstance().init();
+        });
+
+        addListener(PreferencesDialogEvent.SectionsLoaded.class,preferencesDialogEvent -> {
+            preferencesDialogEvent.getPreferencesDialog().addEditTemplatesPanel("cctemplate","cctemplate","json");
         });
 
         addListener(MCreatorLoadedEvent.class, event -> SwingUtilities.invokeLater(() -> Menus.registerMenus(new MCreatorAccessor(event.getMCreator()))));
