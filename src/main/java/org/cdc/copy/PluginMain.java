@@ -1,13 +1,10 @@
 package org.cdc.copy;
 
-import net.mcreator.io.TemplatesLoader;
 import net.mcreator.plugin.JavaPlugin;
 import net.mcreator.plugin.Plugin;
 import net.mcreator.plugin.events.PreGeneratorsLoadingEvent;
 import net.mcreator.plugin.events.ui.PreferencesDialogEvent;
 import net.mcreator.plugin.events.workspace.MCreatorLoadedEvent;
-import net.mcreator.preferences.PreferencesManager;
-import net.mcreator.ui.dialogs.preferences.PreferencesDialog;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -17,27 +14,30 @@ import org.cdc.copy.init.Convertors;
 import org.cdc.copy.init.Extractors;
 import org.cdc.copy.init.Menus;
 import org.cdc.copy.init.TypeAdapters;
+import org.cdc.copy.utils.ResourceUtils;
 
 public class PluginMain extends JavaPlugin {
 
-    private static final Logger LOG = LogManager.getLogger("Copy plugin");
+  private static final Logger LOG = LogManager.getLogger("Copy plugin");
 
-    public PluginMain(Plugin plugin) {
-        super(plugin);
+  public PluginMain(Plugin plugin) {
+    super(plugin);
 
-        addListener(PreGeneratorsLoadingEvent.class,_->{
-            Extractors.getInstance().init();
-            Convertors.getInstance().init();
-            TypeAdapters.getInstance().init();
-        });
+    addListener(PreGeneratorsLoadingEvent.class, _ -> {
+      Extractors.getInstance().init();
+      Convertors.getInstance().init();
+      TypeAdapters.getInstance().init();
+    });
 
-        addListener(PreferencesDialogEvent.SectionsLoaded.class,preferencesDialogEvent -> {
-            preferencesDialogEvent.getPreferencesDialog().addEditTemplatesPanel("cctemplate","cctemplate","json");
-        });
+    addListener(PreferencesDialogEvent.SectionsLoaded.class, preferencesDialogEvent -> {
+      preferencesDialogEvent.getPreferencesDialog().addEditTemplatesPanel("cctemplate",
+          "templates/" + ResourceUtils.getCCTemplateFolder(), "json");
+    });
 
-        addListener(MCreatorLoadedEvent.class, event -> SwingUtilities.invokeLater(() -> Menus.registerMenus(new MCreatorAccessor(event.getMCreator()))));
+    addListener(MCreatorLoadedEvent.class, event -> SwingUtilities.invokeLater(
+        () -> Menus.registerMenus(new MCreatorAccessor(event.getMCreator()))));
 
-        LOG.info("Plugin");
-    }
+    LOG.info("Plugin");
+  }
 
 }

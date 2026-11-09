@@ -11,8 +11,12 @@ import org.cdc.copy.accessor.ResourcePointerAccessor;
  * &#064;CreatedIn  2026/11/8
  */
 public class ResourceUtils {
+  public static String getCCTemplateFolder(){
+    return "cctemplte";
+  }
+
   public static List<ResourcePointerAccessor> getAllCCTemplates(){
-    return TemplatesLoader.loadTemplates("cctemplate","json").stream().map(ResourcePointerAccessor::new).toList();
+    return TemplatesLoader.loadTemplates(getCCTemplateFolder(),"json").stream().map(ResourcePointerAccessor::new).toList();
   }
 
   public static InputStream getResource(String path){

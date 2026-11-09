@@ -5,6 +5,8 @@ import java.io.FileNotFoundException;
 import java.io.Reader;
 import javax.swing.JMenu;
 import javax.swing.SwingUtilities;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.cdc.copy.accessor.MCreatorAccessor;
 import org.cdc.copy.accessor.ResourcePointerAccessor;
 import org.cdc.copy.interfaces.IExtractor;
@@ -16,6 +18,8 @@ import org.cdc.copy.utils.ResourceUtils;
  * &#064;CreatedIn  2026/11/8
  */
 public class Menus {
+
+  private static final Logger LOG = LogManager.getLogger(Menus.class);
 
   public static void registerMenus(MCreatorAccessor mcreator) {
     var mainMenu = mcreator.registerMenu("convenient_copy");
@@ -68,7 +72,8 @@ public class Menus {
             } catch (FileNotFoundException e) {
               throw new RuntimeException(e);
             }
-            if (input == null){
+            if (input == null) {
+              LOG.warn("Can't read template {}", accessor.getPath());
               return;
             }
             var json = mcreator.getGson().fromJson(input, JsonObject.class);
