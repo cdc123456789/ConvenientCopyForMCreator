@@ -1,7 +1,10 @@
 package org.cdc.copy.accessor;
 
+import java.util.ArrayList;
+import java.util.List;
 import net.mcreator.element.ModElementType;
 import net.mcreator.ui.MCreator;
+import net.mcreator.workspace.elements.FolderElement;
 import net.mcreator.workspace.elements.IElement;
 import net.mcreator.workspace.elements.ModElement;
 
@@ -11,8 +14,8 @@ import net.mcreator.workspace.elements.ModElement;
  */
 public class MCreatorElementAccessor {
 
-  private IElement element;
-  private MCreator mCreator;
+  private final IElement element;
+  private final MCreator mCreator;
 
   public MCreatorElementAccessor(IElement element, MCreator mCreator) {
     this.element = element;
@@ -21,18 +24,43 @@ public class MCreatorElementAccessor {
 
   public String toJSON() {
     if (element instanceof ModElement modElement) {
-      return mCreator.getModElementManager().generatableElementToJSON(modElement.getGeneratableElement());
+      return mCreator.getModElementManager()
+          .generatableElementToJSON(modElement.getGeneratableElement());
     }
-    return "";
+    return "{}";
   }
 
-  public String getName(){
+  public String getName() {
     return element.getName();
   }
 
-  public ModElementType<?> getType(){
-    if (element instanceof ModElement modElement){
+  public boolean isFolder() {
+    return element instanceof FolderElement;
+  }
+
+  public List<MCreatorElementAccessor> getElementsInFolder() {
+    if (element instanceof FolderElement folder) {
+      List<MCreatorElementAccessor> list = new ArrayList<>();
+      mCreator.getWorkspace().getModElements().forEach(a -> {
+        if (folder.getPath().equals(a.getFolderPath())) {
+          list.add(new MCreatorElementAccessor(a, mCreator));
+        }
+      });
+      return list;
+    }
+    return List.of();
+  }
+
+  public ModElementType<?> getType() {
+    if (element instanceof ModElement modElement) {
       return modElement.getType();
+    }
+    return null;
+  }
+
+  public String getPath(){
+    if (element instanceof ModElement modElement) {
+      return modElement.getFolderPath();
     }
     return null;
   }

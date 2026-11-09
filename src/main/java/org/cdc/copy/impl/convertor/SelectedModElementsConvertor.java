@@ -25,6 +25,7 @@ public class SelectedModElementsConvertor implements IConvertor {
       var value = stringJsonElementEntry.getValue();
       if (value.isJsonObject()) {
         var value1 = value.getAsJsonObject();
+//        value1.remove("_folder");
         value1 = TypeAdapters.getInstance().restoreFrom(value1, mCreatorAccessor, null);
         mCreatorAccessor.convertJsonAndAddElement(stringJsonElementEntry.getKey(), value1);
       }

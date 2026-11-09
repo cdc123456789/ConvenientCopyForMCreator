@@ -51,10 +51,14 @@ public class TypeAdapters implements ITypeAdapter {
   @Override
   public JsonObject adapteFrom(JsonObject jsonObject, MCreatorAccessor mCreatorAccessor,
       String type1) {
+    if (jsonObject == null) {
+      return null;
+    }
     var type = jsonObject.get("_type").getAsString();
     var typeAdapter = getAdapter(type);
-    var adapted = typeAdapter.adapteFrom(jsonObject.getAsJsonObject("definition"), mCreatorAccessor, type);
-    jsonObject.add("definition",adapted);
+    var adapted = typeAdapter.adapteFrom(jsonObject.getAsJsonObject("definition"), mCreatorAccessor,
+        type);
+    jsonObject.add("definition", adapted);
     jsonObject.remove("_fv");
     return jsonObject;
   }
@@ -62,12 +66,15 @@ public class TypeAdapters implements ITypeAdapter {
   @Override
   public JsonObject restoreFrom(JsonObject jsonObject, MCreatorAccessor mCreatorAccessor,
       String type1) {
+    if (jsonObject == null) {
+      return null;
+    }
     var type = jsonObject.get("_type").getAsString();
     jsonObject.addProperty("_fv", mCreatorAccessor.getFormatVersion());
     var typeAdapter = getAdapter(type);
     var value1 = typeAdapter.restoreFrom(jsonObject.getAsJsonObject("definition"), mCreatorAccessor,
         type);
-    jsonObject.add("definition",value1);
+    jsonObject.add("definition", value1);
     return jsonObject;
   }
 }

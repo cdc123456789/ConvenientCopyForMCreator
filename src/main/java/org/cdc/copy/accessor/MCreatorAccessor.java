@@ -9,6 +9,7 @@ import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 import javax.swing.JMenu;
 import net.mcreator.element.GeneratableElement;
 import net.mcreator.element.ModElementType;
@@ -35,10 +36,13 @@ public class MCreatorAccessor {
   private final Gson gson;
   private final Dialogs dialogs;
 
+  private final ConcurrentHashMap<String, JsonObject> cacheEmptyJsons;
+
   public MCreatorAccessor(MCreator mCreator) {
     this.mCreator = mCreator;
     this.gson = new Gson();
     this.dialogs = new Dialogs(this);
+    this.cacheEmptyJsons = new ConcurrentHashMap<>();
   }
 
   public JMenu registerMenu(String menuIdentify) {
@@ -137,11 +141,16 @@ public class MCreatorAccessor {
   }
 
   public JsonObject getEmptyElementJsonObject(String type) {
+    if (cacheEmptyJsons.containsKey(type)) {
+      return cacheEmptyJsons.get(type);
+    }
     var type1 = ModElementTypeLoader.getModElementType(type);
     var generable = type1.getModElementGUI(mCreator,
         new ModElement(mCreator.getWorkspace(), "empty", type1), false).getElementFromGUI();
-    return gson.fromJson(mCreator.getModElementManager().generatableElementToJSON(generable),
+    var json = gson.fromJson(mCreator.getModElementManager().generatableElementToJSON(generable),
         JsonObject.class).getAsJsonObject("definition");
+    cacheEmptyJsons.put(type, json);
+    return json;
   }
 
   public void sendMessage(String message) {
