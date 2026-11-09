@@ -12,9 +12,11 @@ import org.apache.logging.log4j.Logger;
 import org.cdc.copy.accessor.MCreatorAccessor;
 import org.cdc.copy.accessor.ResourcePointerAccessor;
 import org.cdc.copy.interfaces.IExtractor;
+import org.cdc.copy.ui.ProgressDialog;
 import org.cdc.copy.utils.JsonUtils;
 import org.cdc.copy.utils.L10Helper;
 import org.cdc.copy.utils.ResourceUtils;
+import org.cdc.copy.utils.Workers;
 
 /**
  * &#064;Developer  user
@@ -28,28 +30,49 @@ public class Menus {
     var mainMenu = mcreator.registerMenu("convenient_copy");
 
     mcreator.newBasicActionBuilder().setName("copy").setActionListener(_ -> {
+      var progressDialog = new ProgressDialog(mcreator,"Copying");
       var extractor = Extractors.getInstance();
       var dialogs = mcreator.getDialogs();
       var list = dialogs.showMultipleOptionDialog(extractor.getIDs());
-      JsonObject result = JsonUtils.createDefaultCopiedJson(mcreator);
-      for (String s : list) {
-        IExtractor extractor1 = extractor.getExtractor(s);
-        var result1 = new JsonObject();
-        extractor1.extractFrom(result1, mcreator);
-        result.add(s, result1);
-      }
-      mcreator.setClipBoardText(result);
-      dialogs.showWarningDialog("Copied");
+      extractor.setManager(a->{
+        progressDialog.markFinish();
+        var result = list.contains(a);
+        if (result) {
+          progressDialog.addProgressUnit(a);
+        }
+        return result;
+      });
+      Workers.getInstance().executeCopyOrPaste(()->{
+        JsonObject result = JsonUtils.createDefaultCopiedJson(mcreator);
+        Extractors.getInstance().extractFrom(result,mcreator);
+        progressDialog.markFinish();
+        progressDialog.hide();
+        mcreator.setClipBoardText(result);
+        dialogs.showWarningDialog("Copied");
+      });
+      progressDialog.show();
     }).buildToJMenu(mainMenu);
     mcreator.newBasicActionBuilder().setName("paste").setActionListener(_ -> {
+      var progressDialog = new ProgressDialog(mcreator,"Pasting");
       JsonObject jsonObject = mcreator.getClipBoardText();
       var dialogs = mcreator.getDialogs();
       var error = JsonUtils.validateCopiedJson(jsonObject, mcreator);
+      var convertor = Convertors.getInstance();
       if (error != null) {
         dialogs.showWarningDialog(mcreator.t("error." + error));
         return;
       }
-      Convertors.getInstance().convert(jsonObject, mcreator);
+      convertor.setManager(a->{
+        progressDialog.markFinish();
+        progressDialog.addProgressUnit(a);
+        return true;
+      });
+      Workers.getInstance().executeCopyOrPaste(()->{
+        convertor.convert(jsonObject, mcreator);
+        progressDialog.markFinish();
+        progressDialog.hide();
+      });
+      progressDialog.show();
       dialogs.showWarningDialog("Pasted");
       SwingUtilities.invokeLater(mcreator::reloadWholeWorkspaceTab);
     }).buildToJMenu(mainMenu);

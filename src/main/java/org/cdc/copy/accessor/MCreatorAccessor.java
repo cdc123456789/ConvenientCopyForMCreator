@@ -3,7 +3,8 @@ package org.cdc.copy.accessor;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
-import java.awt.Component;
+
+import java.awt.*;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.UnsupportedFlavorException;
@@ -60,7 +61,7 @@ public class MCreatorAccessor {
     return L10Helper.t(localKey, args);
   }
 
-  public Component getMCreator() {
+  public Window getMCreator() {
     return mCreator;
   }
 

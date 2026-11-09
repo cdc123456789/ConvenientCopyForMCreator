@@ -21,7 +21,7 @@ public class JsonUtils {
     }
     if (jsonObject.has("_fv")) {
       var fv = jsonObject.get("_fv").getAsInt();
-      if (mcreator.getFormatVersion() != fv) {
+      if (mcreator.getFormatVersion() < fv) {
         return "unmatched_format_version";
       }
     }

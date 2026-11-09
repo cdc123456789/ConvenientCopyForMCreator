@@ -4,6 +4,8 @@ import com.google.gson.JsonObject;
 import java.util.HashMap;
 import java.util.List;
 import java.util.ServiceLoader;
+import java.util.function.Function;
+
 import org.cdc.copy.accessor.MCreatorAccessor;
 import org.cdc.copy.interfaces.IExtractor;
 
@@ -25,6 +27,8 @@ public class Extractors implements IExtractor{
     return INSTANCE;
   }
 
+  private Function<String, Boolean> manager;
+
   private Extractors(){}
 
   public void init(){
@@ -39,6 +43,10 @@ public class Extractors implements IExtractor{
     return idToExtractor.keySet().stream().sorted().toList();
   }
 
+  public void setManager(Function<String, Boolean> manager) {
+    this.manager = manager;
+  }
+
   @Override
   public String getID() {
     return "general";
@@ -48,6 +56,9 @@ public class Extractors implements IExtractor{
   public void extractFrom(JsonObject result, MCreatorAccessor mCreatorAccessor) {
     var list = getIDs();
     for (String s : list) {
+      if (manager != null && !manager.apply(s)){
+        continue;
+      }
       IExtractor extractor1 = this.getExtractor(s);
       var result1 = new JsonObject();
       extractor1.extractFrom(result1, mCreatorAccessor);
