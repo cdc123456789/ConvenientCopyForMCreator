@@ -53,7 +53,7 @@ public class MCreatorAccessor {
   }
 
   public String t(String localKey, Object... args) {
-    return L10N.t(localKey, args);
+    return L10Helper.t(localKey, args);
   }
 
   public Component getMCreator() {
@@ -98,11 +98,20 @@ public class MCreatorAccessor {
     return mCreator.getGeneratorStats().getSupportedModElementTypes().contains(elementType);
   }
 
-  public void convertJsonAndAddElement(String name, JsonObject jsonObject) {
+  public void convertJsonAndAddElement(final String name, JsonObject jsonObject) {
+    String usedName = name;
     if (jsonObject.has("_type")) {
       var type = ModElementTypeLoader.getModElementType(jsonObject.get("_type").getAsString());
       if (type != null && supportType(type)) {
-        var modElement = new ModElement(mCreator.getWorkspace(), name, type);
+        if (mCreator.getWorkspace().containsModElement(usedName)) {
+          var newname = dialogs.showRenameDialog(usedName);
+          if (newname == null || newname.isEmpty()) {
+            LOGGER.warn("Duplicated element: {}", usedName);
+            return;
+          }
+          usedName = newname;
+        }
+        var modElement = new ModElement(mCreator.getWorkspace(), usedName, type);
         var element = mCreator.getModElementManager()
             .fromJSONtoGeneratableElementOrNull(jsonObject.toString(), modElement);
         if (element != null) {
@@ -119,7 +128,7 @@ public class MCreatorAccessor {
     }
   }
 
-  public void reloadWholeWorkspaceTab(){
+  public void reloadWholeWorkspaceTab() {
     mCreator.getWorkspacePanel().reloadWorkspaceTab();
   }
 
@@ -133,5 +142,13 @@ public class MCreatorAccessor {
         new ModElement(mCreator.getWorkspace(), "empty", type1), false).getElementFromGUI();
     return gson.fromJson(mCreator.getModElementManager().generatableElementToJSON(generable),
         JsonObject.class).getAsJsonObject("definition");
+  }
+
+  public void sendMessage(String message) {
+    mCreator.getStatusBar().setPersistentMessage(message);
+  }
+
+  public boolean isWorkspaceTab() {
+    return mCreator.getTabs().getCurrentTab() == mCreator.workspaceTab;
   }
 }

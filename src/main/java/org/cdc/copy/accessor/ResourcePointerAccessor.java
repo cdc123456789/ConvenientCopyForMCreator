@@ -3,6 +3,7 @@ package org.cdc.copy.accessor;
 import java.io.FileNotFoundException;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.util.Locale;
 import net.mcreator.io.ResourcePointer;
 
 /**
@@ -26,6 +27,10 @@ public class ResourcePointerAccessor {
   }
 
   public String getIdentify(){
-    return resourcePointer.toString();
+    return resourcePointer.toString().toLowerCase(Locale.ROOT).replace(" ","_");
+  }
+
+  public boolean isInClassPath(){
+    return resourcePointer.isInClasspath();
   }
 }

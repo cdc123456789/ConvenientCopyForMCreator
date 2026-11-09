@@ -16,7 +16,7 @@ public class BasicActionBuilder {
   private final ActionRegistry actionRegistry;
   private String name;
   private ActionListener actionListener;
-
+  private boolean dynamic;
 
   public BasicActionBuilder(ActionRegistry actionRegistry) {
     this.actionRegistry = actionRegistry;
@@ -27,6 +27,11 @@ public class BasicActionBuilder {
     return this;
   }
 
+  public BasicActionBuilder markDynamic() {
+    this.dynamic = true;
+    return this;
+  }
+
   public BasicActionBuilder setActionListener(ActionListener actionListener) {
     this.actionListener = actionListener;
     return this;
@@ -34,7 +39,8 @@ public class BasicActionBuilder {
 
   public void buildToJMenu(JMenu jMenu) {
     BasicAction basicAction = new BasicAction(actionRegistry,
-        L10N.t("plugin.ccopy.menu." + jMenu.getName() + "." + name), actionListener);
+        dynamic ? name : L10N.t("plugin.ccopy.menu." + jMenu.getName() + "." + name),
+        actionListener);
     jMenu.add(basicAction);
   }
 }

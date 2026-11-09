@@ -33,8 +33,12 @@ public class Dialogs {
       panel.add(checkBox);
       selected.add(checkBox);
     }
-    JOptionPane.showConfirmDialog(mCreator.getMCreator(), panel, L10N.t("dialog.options.title"),
+    var select = JOptionPane.showConfirmDialog(mCreator.getMCreator(), panel,
+        L10N.t("dialog.options.title"),
         JOptionPane.OK_CANCEL_OPTION);
+    if (select == JOptionPane.CANCEL_OPTION) {
+      return List.of();
+    }
     return selected.stream().map(a -> a.isSelected() ? a.getName() : null).filter(Objects::nonNull)
         .toList();
   }
@@ -48,5 +52,9 @@ public class Dialogs {
           JOptionPane.ERROR_MESSAGE, JOptionPane.QUESTION_MESSAGE,
           JOptionPane.PLAIN_MESSAGE}) int messageType) {
     JOptionPane.showMessageDialog(mCreator.getMCreator(), message, title, messageType);
+  }
+
+  public String showRenameDialog(String originName) {
+    return JOptionPane.showInputDialog(mCreator.getMCreator(), "Input new name", originName);
   }
 }

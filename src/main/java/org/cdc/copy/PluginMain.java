@@ -23,11 +23,11 @@ public class PluginMain extends JavaPlugin {
   public PluginMain(Plugin plugin) {
     super(plugin);
 
-    addListener(PreGeneratorsLoadingEvent.class, _ -> {
+    addListener(PreGeneratorsLoadingEvent.class, _ -> SwingUtilities.invokeLater(() -> {
       Extractors.getInstance().init();
       Convertors.getInstance().init();
       TypeAdapters.getInstance().init();
-    });
+    }));
 
     addListener(PreferencesDialogEvent.SectionsLoaded.class, preferencesDialogEvent -> {
       preferencesDialogEvent.getPreferencesDialog().addEditTemplatesPanel("cctemplate",

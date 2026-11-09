@@ -1,15 +1,18 @@
 package org.cdc.copy.init;
 
 import com.google.gson.JsonObject;
+import java.awt.event.ActionListener;
 import java.io.FileNotFoundException;
 import java.io.Reader;
-import javax.swing.JMenu;
 import javax.swing.SwingUtilities;
+import javax.swing.event.MenuEvent;
+import javax.swing.event.MenuListener;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.cdc.copy.accessor.MCreatorAccessor;
 import org.cdc.copy.accessor.ResourcePointerAccessor;
 import org.cdc.copy.interfaces.IExtractor;
+import org.cdc.copy.utils.JsonUtils;
 import org.cdc.copy.utils.L10Helper;
 import org.cdc.copy.utils.ResourceUtils;
 
@@ -28,8 +31,7 @@ public class Menus {
       var extractor = Extractors.getInstance();
       var dialogs = mcreator.getDialogs();
       var list = dialogs.showMultipleOptionDialog(extractor.getIDs());
-      JsonObject result = new JsonObject();
-      result.addProperty("_fv", mcreator.getFormatVersion());
+      JsonObject result = JsonUtils.createDefaultCopiedJson(mcreator);
       for (String s : list) {
         IExtractor extractor1 = extractor.getExtractor(s);
         var result1 = new JsonObject();
@@ -42,45 +44,61 @@ public class Menus {
     mcreator.newBasicActionBuilder().setName("paste").setActionListener(_ -> {
       JsonObject jsonObject = mcreator.getClipBoardText();
       var dialogs = mcreator.getDialogs();
-      if (jsonObject == null) {
-        dialogs.showWarningDialog(mcreator.t("error.unkown_format_in_clipboard"));
+      var error = JsonUtils.validateCopiedJson(jsonObject, mcreator);
+      if (error != null) {
+        dialogs.showWarningDialog(mcreator.t("error." + error));
         return;
-      }
-      if (jsonObject.has("_fv")) {
-        var fv = jsonObject.get("_fv").getAsInt();
-        if (mcreator.getFormatVersion() != fv) {
-          dialogs.showWarningDialog(
-              mcreator.t("error.unmatched_format_version", mcreator.getFormatVersion()));
-          return;
-        }
       }
       Convertors.getInstance().convert(jsonObject, mcreator);
       dialogs.showWarningDialog("Pasted");
       SwingUtilities.invokeLater(mcreator::reloadWholeWorkspaceTab);
     }).buildToJMenu(mainMenu);
 
-    var templates = new JMenu(mcreator.t(L10Helper.getMenuKey("templates")));
-    templates.setName("templates");
+    var templates = L10Helper.menu("templates");
     mainMenu.add(templates);
 
-    for (ResourcePointerAccessor accessor : ResourceUtils.getAllCCTemplates()) {
-      mcreator.newBasicActionBuilder().setName(accessor.getIdentify())
-          .setActionListener(_ -> {
-            Reader input = null;
-            try {
-              input = accessor.getReader();
-            } catch (FileNotFoundException e) {
-              throw new RuntimeException(e);
+    mainMenu.addMenuListener(new MenuListener() {
+      @Override
+      public void menuSelected(MenuEvent ignored) {
+        templates.removeAll();
+        SwingUtilities.invokeLater(()->{
+          for (ResourcePointerAccessor accessor : ResourceUtils.getAllCCTemplates()) {
+            ActionListener actionListener = _ -> {
+              Reader input = null;
+              try {
+                input = accessor.getReader();
+              } catch (FileNotFoundException e) {
+                throw new RuntimeException(e);
+              }
+              if (input == null) {
+                LOG.warn("Can't read template {}", accessor.getPath());
+                return;
+              }
+              var json = mcreator.getGson().fromJson(input, JsonObject.class);
+              Convertors.getInstance().convert(json, mcreator);
+              SwingUtilities.invokeLater(mcreator::reloadWholeWorkspaceTab);
+            };
+            if (accessor.isInClassPath()) {
+              mcreator.newBasicActionBuilder().setName(accessor.getIdentify())
+                  .setActionListener(actionListener).buildToJMenu(templates);
+            } else {
+              mcreator.newBasicActionBuilder().markDynamic().setName(accessor.getIdentify())
+                  .setActionListener(actionListener).buildToJMenu(templates);
             }
-            if (input == null) {
-              LOG.warn("Can't read template {}", accessor.getPath());
-              return;
-            }
-            var json = mcreator.getGson().fromJson(input, JsonObject.class);
-            Convertors.getInstance().convert(json, mcreator);
-            SwingUtilities.invokeLater(mcreator::reloadWholeWorkspaceTab);
-          }).buildToJMenu(templates);
-    }
+          }
+        });
+      }
+
+      @Override
+      public void menuDeselected(MenuEvent e) {
+
+      }
+
+      @Override
+      public void menuCanceled(MenuEvent e) {
+
+      }
+    });
   }
 
 }

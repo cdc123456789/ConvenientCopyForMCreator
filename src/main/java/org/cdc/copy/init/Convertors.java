@@ -59,13 +59,17 @@ public class Convertors implements IConvertor {
       return;
     }
     for (Entry<String, JsonElement> stringJsonElementEntry : jsonObject.entrySet()) {
-      if (idToDecoder.containsKey(stringJsonElementEntry.getKey())) {
-        var decoder = getDecoder(stringJsonElementEntry.getKey());
+      var key = stringJsonElementEntry.getKey();
+      if (idToDecoder.containsKey(key)) {
+        var decoder = getDecoder(key);
         if (stringJsonElementEntry.getValue().isJsonObject()) {
           decoder.convert(stringJsonElementEntry.getValue().getAsJsonObject(), mCreatorAccessor);
         }
       } else {
-        LOGGER.warn("Unknown decoder: {}", stringJsonElementEntry.getKey());
+        // special key: _fv
+        if (key.charAt(0) != '_'){
+          LOGGER.warn("Unknown decoder: {}", key);
+        }
       }
     }
   }

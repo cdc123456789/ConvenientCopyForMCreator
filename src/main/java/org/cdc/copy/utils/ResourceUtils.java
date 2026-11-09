@@ -12,7 +12,7 @@ import org.cdc.copy.accessor.ResourcePointerAccessor;
  */
 public class ResourceUtils {
   public static String getCCTemplateFolder(){
-    return "cctemplte";
+    return "cctemplate";
   }
 
   public static List<ResourcePointerAccessor> getAllCCTemplates(){
