@@ -3,6 +3,7 @@ package org.cdc.copy.ui;
 import org.cdc.copy.accessor.MCreatorAccessor;
 
 import javax.swing.*;
+import java.awt.*;
 
 /**
  * &#064;Developer  user
@@ -14,6 +15,10 @@ public class ProgressDialog {
 
     public ProgressDialog(MCreatorAccessor mcreator, String title) {
         this.parent = new net.mcreator.ui.dialogs.ProgressDialog(mcreator.getMCreator(), title);
+    }
+
+    public ProgressDialog(Window mcreator, String title) {
+        this.parent = new net.mcreator.ui.dialogs.ProgressDialog(mcreator, title);
     }
 
     public void addProgressUnit(String name) {

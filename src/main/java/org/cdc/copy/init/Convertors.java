@@ -9,10 +9,12 @@ import java.util.Map.Entry;
 import java.util.ServiceLoader;
 import java.util.function.Function;
 
+import net.mcreator.ui.workspace.WorkspacePanel;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.cdc.copy.accessor.MCreatorAccessor;
 import org.cdc.copy.interfaces.IConvertor;
+import org.cdc.copy.utils.Workers;
 
 /**
  * &#064;Developer  user
@@ -67,22 +69,29 @@ public class Convertors implements IConvertor {
         if (jsonObject == null) {
             return;
         }
-        for (Entry<String, JsonElement> stringJsonElementEntry : jsonObject.entrySet()) {
-            var key = stringJsonElementEntry.getKey();
-            if (idToDecoder.containsKey(key)) {
-                var decoder = getDecoder(key);
-                if (manager != null && !manager.apply(key)) {
-                    continue;
+        var progressDialog = mCreatorAccessor.createProgressDialog("Pasting");
+        Workers.getInstance().executeCopyOrPaste(()->{
+            for (Entry<String, JsonElement> stringJsonElementEntry : jsonObject.entrySet()) {
+                var key = stringJsonElementEntry.getKey();
+                progressDialog.addProgressUnit(key);
+                if (idToDecoder.containsKey(key)) {
+                    var decoder = getDecoder(key);
+                    if (manager != null && !manager.apply(key)) {
+                        continue;
+                    }
+                    if (stringJsonElementEntry.getValue().isJsonObject()) {
+                        decoder.convert(stringJsonElementEntry.getValue().getAsJsonObject(), mCreatorAccessor);
+                    }
+                } else {
+                    // special key: _fv
+                    if (key.charAt(0) != '_') {
+                        LOGGER.warn("Unknown decoder: {}", key);
+                    }
                 }
-                if (stringJsonElementEntry.getValue().isJsonObject()) {
-                    decoder.convert(stringJsonElementEntry.getValue().getAsJsonObject(), mCreatorAccessor);
-                }
-            } else {
-                // special key: _fv
-                if (key.charAt(0) != '_') {
-                    LOGGER.warn("Unknown decoder: {}", key);
-                }
+                progressDialog.markFinish();
             }
-        }
+            progressDialog.hide();
+        });
+        progressDialog.show();
     }
 }

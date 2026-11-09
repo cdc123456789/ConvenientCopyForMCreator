@@ -8,6 +8,7 @@ import java.util.function.Function;
 
 import org.cdc.copy.accessor.MCreatorAccessor;
 import org.cdc.copy.interfaces.IExtractor;
+import org.cdc.copy.utils.Workers;
 
 /**
  * &#064;Developer  user
@@ -54,15 +55,22 @@ public class Extractors implements IExtractor{
 
   @Override
   public void extractFrom(JsonObject result, MCreatorAccessor mCreatorAccessor) {
-    var list = getIDs();
-    for (String s : list) {
-      if (manager != null && !manager.apply(s)){
-        continue;
+    var progressDialog = mCreatorAccessor.createProgressDialog("Copying");
+    Workers.getInstance().executeCopyOrPaste(()->{
+      var list = getIDs();
+      for (String s : list) {
+        progressDialog.addProgressUnit(s);
+        if (manager != null && !manager.apply(s)){
+          continue;
+        }
+        IExtractor extractor1 = this.getExtractor(s);
+        var result1 = new JsonObject();
+        extractor1.extractFrom(result1, mCreatorAccessor);
+        result.add(s, result1);
+        progressDialog.markFinish();
       }
-      IExtractor extractor1 = this.getExtractor(s);
-      var result1 = new JsonObject();
-      extractor1.extractFrom(result1, mCreatorAccessor);
-      result.add(s, result1);
-    }
+      progressDialog.hide();
+    });
+    progressDialog.show();
   }
 }
