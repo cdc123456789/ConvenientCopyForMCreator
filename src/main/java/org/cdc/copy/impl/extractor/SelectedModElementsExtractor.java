@@ -33,7 +33,7 @@ public class SelectedModElementsExtractor implements IExtractor {
                 elements.add(a);
             }
         });
-        int delta = 100 / (elements.size() + 1);
+        int delta = 100 / Math.max(elements.size(), 1);
         AtomicInteger percent = new AtomicInteger();
         for (MCreatorElementAccessor selectedModElement : elements) {
             mCreatorAccessor.getProgressDialog().ifPresent(a -> a.setProgress(percent.addAndGet(delta)));

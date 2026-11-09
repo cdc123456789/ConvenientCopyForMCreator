@@ -10,6 +10,7 @@ import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.swing.JMenu;
 import net.mcreator.element.GeneratableElement;
@@ -23,6 +24,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.cdc.copy.builder.BasicActionBuilder;
 import org.cdc.copy.ui.Dialogs;
+import org.cdc.copy.ui.ProgressDialog;
 import org.cdc.copy.utils.L10Helper;
 
 /**
@@ -36,6 +38,7 @@ public class MCreatorAccessor {
   private final MCreator mCreator;
   private final Gson gson;
   private final Dialogs dialogs;
+  private ProgressDialog progressDialog;
 
   private final ConcurrentHashMap<String, JsonObject> cacheEmptyJsons;
 
@@ -160,5 +163,14 @@ public class MCreatorAccessor {
 
   public boolean isWorkspaceTab() {
     return mCreator.getTabs().getCurrentTab() == mCreator.workspaceTab;
+  }
+
+  public Optional<ProgressDialog> getProgressDialog(){
+    return Optional.ofNullable(progressDialog);
+  }
+
+  public ProgressDialog createProgressDialog(String title){
+    this.progressDialog = new ProgressDialog(mCreator,title);
+    return progressDialog;
   }
 }

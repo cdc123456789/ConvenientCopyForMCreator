@@ -13,12 +13,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.cdc.copy.accessor.MCreatorAccessor;
 import org.cdc.copy.accessor.ResourcePointerAccessor;
-import org.cdc.copy.interfaces.IExtractor;
-import org.cdc.copy.ui.ProgressDialog;
 import org.cdc.copy.utils.JsonUtils;
 import org.cdc.copy.utils.L10Helper;
 import org.cdc.copy.utils.ResourceUtils;
-import org.cdc.copy.utils.Workers;
 
 /**
  * &#064;Developer  user
@@ -60,7 +57,7 @@ public class Menus {
 
         mainMenu.addMenuListener(new MenuListener() {
             @Override
-            public void menuSelected(MenuEvent ignored) {
+            public void menuSelected(MenuEvent i) {
                 templates.removeAll();
                 SwingUtilities.invokeLater(() -> {
                     for (ResourcePointerAccessor accessor : ResourceUtils.getAllCCTemplates()) {
@@ -68,8 +65,7 @@ public class Menus {
                             Reader input = null;
                             try {
                                 input = accessor.getReader();
-                            } catch (FileNotFoundException e) {
-                                throw new RuntimeException(e);
+                            } catch (FileNotFoundException ignored) {
                             }
                             if (input == null) {
                                 LOG.warn("Can't read template {}", accessor.getPath());

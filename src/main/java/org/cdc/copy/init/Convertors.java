@@ -9,7 +9,6 @@ import java.util.Map.Entry;
 import java.util.ServiceLoader;
 import java.util.function.Function;
 
-import net.mcreator.ui.workspace.WorkspacePanel;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.cdc.copy.accessor.MCreatorAccessor;

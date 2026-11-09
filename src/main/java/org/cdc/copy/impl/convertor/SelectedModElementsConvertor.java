@@ -24,7 +24,7 @@ public class SelectedModElementsConvertor implements IConvertor {
     @Override
     public void convert(JsonObject object, MCreatorAccessor mCreatorAccessor) {
         mCreatorAccessor.sendMessage(mCreatorAccessor.t("msg.convertor.selected_mod_elements.added_elements", object.size()));
-        int delta = 100 / (object.size() + 1);
+        int delta = 100 / Math.max(object.size(), 1);
         AtomicInteger percent = new AtomicInteger();
         for (Entry<String, JsonElement> stringJsonElementEntry : object.entrySet()) {
             mCreatorAccessor.getProgressDialog().ifPresent(a -> a.setProgress(percent.addAndGet(delta)));
